@@ -1,0 +1,20 @@
+version: '1'
+
+services:
+  postgres:
+    image: 'postgres:latest'
+    container_name: "top_api"
+    env_file:
+      - .env  # must define POSTGRES_USER, POSTGRES_PASSWORD and POSTGRES_DB
+    volumes:
+      - database-data:/var/lib/postgresql/data/  # persist data
+    ports:
+      - '8778:5432'  # required to access DB from host system
+  redis:
+    image: redis:5
+    volumes:
+      - redis_data:/data
+
+volumes:
+  database-data:
+  redis_data:
