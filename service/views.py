@@ -3,6 +3,7 @@ from typing import Any, Optional
 
 from django.db.models import QuerySet
 from django.http import FileResponse
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -21,6 +22,12 @@ from service.app_services.utils import (
 from service.models import Check
 from service.schemas import CheckSchema
 from service.serializers import CheckSerializer
+from service.swagger_schemas import (
+    swagger_check_create_responses,
+    swagger_check_create_schema,
+    swagger_check_patch_responses,
+    swagger_check_patch_schema,
+)
 
 
 class CheckView(APIView):
@@ -28,6 +35,10 @@ class CheckView(APIView):
 
     schema: AutoSchema = CheckSchema()
 
+    @swagger_auto_schema(
+        request_body=swagger_check_create_schema,
+        responses=swagger_check_create_responses,
+    )
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Handle post request."""
         printers: Optional[QuerySet] = get_printers(request.data)
@@ -35,6 +46,10 @@ class CheckView(APIView):
         perform_check_creation(request.data, printers=printers)
         return Response({"message": "Checks were successfully created."})
 
+    @swagger_auto_schema(
+        request_body=swagger_check_patch_schema,
+        responses=swagger_check_patch_responses,
+    )
     def patch(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Change Check status field."""
         instance = check_exists(request.data)
