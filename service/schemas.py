@@ -43,10 +43,7 @@ class CheckSchema(AutoSchema):
                     name="point_id",
                     required=True,
                     location="form",
-                    schema=coreschema.String(
-                        description="Check status. Choice from 'new',"
-                        " 'rendered', 'printed'."
-                    ),
+                    schema=coreschema.String(description="Point id."),
                 ),
             ]
         else:
