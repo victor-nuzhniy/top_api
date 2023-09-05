@@ -4,9 +4,9 @@ from typing import Dict, Optional
 
 from django.db.models import QuerySet
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer
 
+from service.app_services.exceptions import CustomValidationError
 from service.models import Check, Printer
 from service.serializers import CheckSerializer
 
@@ -16,9 +16,10 @@ def get_printers(data: Dict) -> Optional[QuerySet]:
     point_id: int = data.get("point_id")
     if printers := Printer.objects.filter(point_id=point_id).only("id"):
         return printers
-    raise ValidationError(
-        {"message": "Point has no printer assigned to."},
-        code=status.HTTP_404_NOT_FOUND,
+    raise CustomValidationError(
+        detail="Point has no printer assigned to.",
+        field="message",
+        status_code=status.HTTP_404_NOT_FOUND,
     )
 
 
@@ -31,9 +32,10 @@ def check_order_not_exists(data: Dict) -> None:
     order: bytes = data.get("order")
     if Check.objects.filter(order=order).exists():
         order_data = json.loads(order)
-        raise ValidationError(
-            {"message": f"Order with id {order_data.get('id')} already exists."},
-            code=status.HTTP_409_CONFLICT,
+        raise CustomValidationError(
+            detail=f"Order with id {order_data.get('id')} already exists.",
+            field="message",
+            status_code=status.HTTP_409_CONFLICT,
         )
 
 
@@ -63,12 +65,11 @@ def check_exists(data: Dict) -> Check:
         id=check_id, printer_id__api_key=api_key
     ).first():
         return instance
-    raise ValidationError(
-        {
-            "message": f"Check with id {check_id} created for printer with "
-            f"key {api_key} does not exist"
-        },
-        code=status.HTTP_404_NOT_FOUND,
+    raise CustomValidationError(
+        detail=f"Check with id {check_id} created for printer with "
+        f"key {api_key} does not exist",
+        field="message",
+        status_code=status.HTTP_404_NOT_FOUND,
     )
 
 
@@ -86,7 +87,9 @@ def get_check_instance(data: Dict) -> Check:
     pk: int = data.get("pk")
     instance: Check = Check.objects.get(pk=pk)
     if not instance.pdf_file:
-        raise ValidationError(
-            {"message": "There no check pdf file."}, code=status.HTTP_404_NOT_FOUND
+        raise CustomValidationError(
+            detail="There is no check pdf file.",
+            field="message",
+            status_code=status.HTTP_404_NOT_FOUND,
         )
     return instance
