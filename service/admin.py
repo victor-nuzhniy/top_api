@@ -9,6 +9,7 @@ class CheckAdmin(admin.ModelAdmin):
 
     list_display = ("id", "printer_id", "type", "status")
     list_display_links = ("id", "printer_id", "type")
+    list_filter = ("printer_id", "type", "status")
 
 
 class PrinterAdmin(admin.ModelAdmin):
