@@ -27,6 +27,7 @@ from service.swagger_schemas import (
     swagger_check_create_schema,
     swagger_check_patch_responses,
     swagger_check_patch_schema,
+    swagger_download_responses,
 )
 
 
@@ -76,6 +77,7 @@ class DownloadCheckView(APIView):
 
     schema: AutoSchema = AutoSchema()
 
+    @swagger_auto_schema(responses=swagger_download_responses)
     def get(
         self, request: Request, *args: Any, **kwargs: Any
     ) -> FileResponse | Response:
