@@ -48,9 +48,7 @@ class Check(models.Model):
     status: str = models.CharField(
         max_length=10, choices=STATUS, default="new", verbose_name="Check status"
     )
-    pdf_file: IO = models.FileField(
-        upload_to=None, blank=True, null=True, verbose_name="PDF file"
-    )
+    pdf_file: IO = models.FileField(blank=True, null=True, verbose_name="PDF file")
 
     def __str__(self) -> str:
         """Represent Check model."""
