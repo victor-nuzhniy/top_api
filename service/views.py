@@ -1,6 +1,5 @@
 """Class and function views of 'service' app."""
-import json
-from typing import Any
+from typing import Any, Optional
 
 from django.db.models import QuerySet
 from django.http import FileResponse
@@ -11,7 +10,12 @@ from rest_framework.schemas import AutoSchema
 from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 
-from service.models import Check, Printer
+from service.app_services.utils import (
+    check_order_not_exists,
+    get_printers,
+    perform_check_creation,
+)
+from service.models import Check
 from service.schemas import CheckSchema
 from service.serializers import CheckSerializer
 
@@ -23,25 +27,9 @@ class CheckView(APIView):
 
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Handle post request."""
-        serializer: Serializer = CheckSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        point_id: int = request.data.get("point_id")
-        if not (printers := Printer.objects.filter(point_id=point_id).only("id")):
-            return Response(
-                {"message": "Point has no printer assigned to."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        order: bytes = request.data.get("order")
-        if Check.objects.filter(order=order).exists():
-            order_data = json.loads(order)
-            return Response(
-                {"message": f"Order with id {order_data.get('id')} already exists."},
-                status=status.HTTP_409_CONFLICT,
-            )
-        for printer in printers:
-            serializer.save(printer_id=printer)
-            serializer.instance = None
-            # TODO here must be inserted celery task call for pdf file creation
+        printers: Optional[QuerySet] = get_printers(request.data)
+        check_order_not_exists(request.data)
+        perform_check_creation(request.data, printers=printers)
         return Response({"message": "Checks were successfully created."})
 
     def patch(self, request: Request, *args: Any, **kwargs: Any) -> Response:
