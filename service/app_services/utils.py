@@ -44,3 +44,41 @@ def perform_check_creation(data: Dict, printers: QuerySet) -> None:
         serializer.save(printer_id=printer)
         serializer.instance = None
         # TODO here must be inserted celery task call for pdf file creation
+
+
+def check_exists(data: Dict) -> Check:
+    """
+    Get check instance by given data.
+
+    If it's not exist, raise ValidationError. Otherwise return instance.
+    """
+    check_id: int = data.get("check_id")
+    api_key: str = data.get("api_key")
+    if instance := Check.objects.filter(
+        id=check_id, printer_id__api_key=api_key
+    ).first():
+        return instance
+    raise ValidationError(
+        {
+            "message": f"Check with id {check_id} created for printer with "
+            f"key {api_key} does not exist"
+        }
+    )
+
+
+def perform_partial_check_update(instance: Check, data: Dict) -> None:
+    """Perform partial update Check model."""
+    serializer: ModelSerializer = CheckSerializer(
+        instance=instance, data=data, partial=True
+    )
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+
+
+def get_check_instance(data: Dict) -> Check:
+    """Get Check model instance by pk."""
+    pk: int = data.get("pk")
+    instance: Check = Check.objects.get(pk=pk)
+    if not instance.pdf_file:
+        raise ValidationError({"message": "There no check pdf file."})
+    return instance
