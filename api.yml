@@ -1,0 +1,171 @@
+swagger: '2.0'
+info:
+  title: Servise API
+  description: Service for check creation and downloading.
+  termsOfService: https://www.google.com/policies/terms/
+  contact:
+    email: nuzhniyva@gmail.com
+  license:
+    name: BSD License
+  version: v1
+host: 127.0.0.1:8000
+schemes:
+- http
+basePath: /service
+consumes:
+- application/json
+produces:
+- application/json
+securityDefinitions:
+  Basic:
+    type: basic
+security:
+- Basic: []
+paths:
+  /check/:
+    post:
+      operationId: check_create
+      description: Handle post request.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          title: Create check
+          type: object
+          properties:
+            type:
+              description: Check type. Choice from 'kitchen' and 'client'.
+              type: string
+              example: kitchen
+            order:
+              description: Order in json format
+              type: object
+              properties: {}
+              example: '{"id": 1, "soap": {"price": 100, "quantity": 2}}'
+            status:
+              description: Check status. Choice from 'new', 'rendered', 'printed'.
+              type: string
+              example: new
+            point_id:
+              description: Point id
+              type: integer
+              example: 1
+      responses:
+        '200':
+          description: Check was successfully created.
+        '400':
+          description: Validation errors.
+        '404':
+          description: Point has no printer assigned to.
+        '409':
+          description: Order with id already exists.
+      tags:
+      - check
+    patch:
+      operationId: check_partial_update
+      description: Change Check status field.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          title: Patch check
+          type: object
+          properties:
+            status:
+              description: Check status. Choice from 'new', 'rendered', 'printed'.
+              type: string
+              example: printed
+            api_key:
+              description: Printer api key.
+              type: string
+              example: 1
+            check_id:
+              type: integer
+              default: Check id
+              example: 1
+      responses:
+        '200':
+          description: Successfully changed check status
+        '400':
+          description: Validation errors.
+        '404':
+          description: Check with id created for printer with key does not exist
+      tags:
+      - check
+    parameters: []
+  /download/{id}/:
+    get:
+      operationId: download_read
+      description: Download file with GET request.
+      parameters: []
+      responses:
+        '200':
+          description: Successfully download pdf file.
+        '404':
+          description: There is no check pdf file.
+      tags:
+      - download
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /printer/{api_key}/:
+    get:
+      operationId: printer_read
+      description: Class view with GET method to retrieve rendered and not printed
+        checks.
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Check'
+      tags:
+      - printer
+    parameters:
+    - name: api_key
+      in: path
+      required: true
+      type: string
+definitions:
+  Check:
+    required:
+    - type
+    - order
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      type:
+        title: Check type
+        type: string
+        enum:
+        - kitchen
+        - client
+      order:
+        title: Order data
+        type: object
+      status:
+        title: Check status
+        type: string
+        enum:
+        - new
+        - rendered
+        - printed
+      pdf_file:
+        title: PDF file
+        type: string
+        readOnly: true
+        x-nullable: true
+        format: uri
+      printer_id:
+        title: Printer
+        type: integer
+        readOnly: true
