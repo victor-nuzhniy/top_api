@@ -22,5 +22,5 @@ class CheckSerializer(serializers.ModelSerializer):
         """Class Meta for Check serializer class."""
 
         model = Check
-        fields = "__all__"
-        read_only_fields = ("id",)
+        exclude = "__all__"
+        read_only_fields = ("id", "printer_id")
