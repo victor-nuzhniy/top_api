@@ -18,7 +18,7 @@ from service.serializers import CheckSerializer
 def get_printers(data: Dict) -> Optional[QuerySet]:
     """Get printers queryset using point_id or raise error if they aren't."""
     point_id: int = data.get("point_id")
-    if printers := Printer.objects.filter(point_id=point_id).only("id"):
+    if printers := Printer.objects.filter(point_id=point_id).only("check_type"):
         return printers
     raise CustomValidationError(
         detail="Point has no printer assigned to.",
@@ -51,9 +51,9 @@ def perform_check_creation(data: Dict, printers: QuerySet) -> None:
     serializer: ModelSerializer = CheckSerializer(data=data)
     serializer.is_valid(raise_exception=True)
     for printer in printers:
-        serializer.save(printer_id=printer)
+        serializer.save(printer_id=printer, type=printer.check_type)
         # TODO here must be inserted celery task call for pdf file creation
-        write_file(data, serializer.instance.pk)
+        write_file(data, serializer.instance.pk, printer.check_type)
         serializer.instance = None
 
 
@@ -104,12 +104,13 @@ def get_pdf_file_name(order_id: int, check_type: str) -> str:
     return f"{order_id}_{check_type}.pdf"
 
 
-def write_file(data: Dict, check_id: int) -> str:
+def write_file(data: Dict, check_id: int, check_type: str) -> str:
     """Write pdf file, using check order data, attach it to check model."""
     context = data.get("order")
-    content = render_to_string("client.html", context)
+    template: str = "client.html" if check_type == "client" else "kitchen.html"
+    content = render_to_string(template, context)
 
-    pdf_file: str = get_pdf_file_name(context.get("id"), data.get("type"))
+    pdf_file: str = get_pdf_file_name(context.get("id"), check_type)
 
     url = "http://127.0.0.1:8001/"
 
@@ -122,8 +123,6 @@ def write_file(data: Dict, check_id: int) -> str:
     }
     response = requests.post(url, data=json.dumps(data), headers=headers)
 
-    # with open(f"media/pdf/{pdf_file}", "wb") as file:
-    #     file.write(response.content)
     check = Check.objects.get(id=check_id)
     check.pdf_file.save(pdf_file, ContentFile(response.content))
     check.status = "rendered"
