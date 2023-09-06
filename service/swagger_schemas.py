@@ -13,8 +13,76 @@ swagger_check_create_schema = openapi.Schema(
         "order": openapi.Schema(
             type=openapi.TYPE_OBJECT,
             description="Order in json format",
-            properties={},
-            example='{"id": 1, "soap": {"price": 100, "quantity": 2}}',
+            properties={
+                "id": openapi.Schema(
+                    type=openapi.TYPE_INTEGER, description="Order id", example=1
+                ),
+                "date": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Order date.",
+                    example="2012/12/12",
+                ),
+                "point": openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "id": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="Point id",
+                            example=1,
+                        ),
+                        "name": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Point name",
+                            example="Spanish pilot",
+                        ),
+                    },
+                ),
+                "products": openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    description="Order products",
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        description="Order product",
+                        properties={
+                            "id": openapi.Schema(
+                                type=openapi.TYPE_INTEGER,
+                                description="Product number in order",
+                                example=1,
+                            ),
+                            "name": openapi.Schema(
+                                type=openapi.TYPE_STRING,
+                                description="Product name",
+                                example="Soap",
+                            ),
+                            "code": openapi.Schema(
+                                type=openapi.TYPE_STRING,
+                                description="Product code",
+                                example="1452984",
+                            ),
+                            "quantity": openapi.Schema(
+                                type=openapi.TYPE_INTEGER,
+                                description="Product quantity",
+                                example=2,
+                            ),
+                            "price": openapi.Schema(
+                                type=openapi.TYPE_INTEGER,
+                                description="Product price",
+                                example=100,
+                            ),
+                            "sum": openapi.Schema(
+                                type=openapi.TYPE_INTEGER,
+                                description="Product sum",
+                                example=200,
+                            ),
+                        },
+                    ),
+                ),
+                "total": openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="Order sum",
+                    example=200,
+                ),
+            },
         ),
         "status": openapi.Schema(
             type=openapi.TYPE_STRING,

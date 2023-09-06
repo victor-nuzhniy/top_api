@@ -27,7 +27,7 @@ class CheckSchema(AutoSchema):
                     name="order",
                     required=True,
                     location="form",
-                    schema=coreschema.String(description="Order data."),
+                    schema=coreschema.Object(description="Order data."),
                     description="Order data.",
                 ),
                 coreapi.Field(
