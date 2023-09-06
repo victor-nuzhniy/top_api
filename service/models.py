@@ -49,7 +49,7 @@ class Check(models.Model):
         Printer, on_delete=models.CASCADE, verbose_name="Printer"
     )
     type: str = models.CharField(
-        max_length=10, choices=CHECK_TYPE, verbose_name="Check type"
+        max_length=10, choices=CHECK_TYPE, default="kitchen", verbose_name="Check type"
     )
     order: bytes = models.JSONField(verbose_name="Order data")
     status: str = models.CharField(
