@@ -18,7 +18,9 @@ class Printer(models.Model):
     ]
 
     name: str = models.CharField(max_length=100, verbose_name="Printer name")
-    api_key: str = models.CharField(max_length=150, verbose_name="Printer api key")
+    api_key: str = models.CharField(
+        max_length=150, unique=True, verbose_name="Printer api key"
+    )
     check_type: str = models.CharField(
         max_length=10, choices=CHECK_TYPE, verbose_name="Check type"
     )
