@@ -53,7 +53,7 @@ def perform_check_creation(data: Dict, printers: QuerySet) -> None:
     for printer in printers:
         serializer.save(printer_id=printer, type=printer.check_type)
         # TODO here must be inserted celery task call for pdf file creation
-        write_file(data, serializer.instance.pk, printer.check_type)
+        write_file(data.get("order"), serializer.instance.pk, printer.check_type)
         serializer.instance = None
 
 
@@ -104,27 +104,33 @@ def get_pdf_file_name(order_id: int, check_type: str) -> str:
     return f"{order_id}_{check_type}.pdf"
 
 
-def write_file(data: Dict, check_id: int, check_type: str) -> str:
-    """Write pdf file, using check order data, attach it to check model."""
-    context = data.get("order")
+def create_pdf_data(context: Dict, check_type: str) -> bytes:
+    """Create pdf data, using context dict, templates, wkhtmltopdf server."""
+    url = "http://127.0.0.1:8001/"
+    headers = {
+        "Content-Type": "application/json",
+    }
     template: str = "client.html" if check_type == "client" else "kitchen.html"
     content = render_to_string(template, context)
-
-    pdf_file: str = get_pdf_file_name(context.get("id"), check_type)
-
-    url = "http://127.0.0.1:8001/"
 
     base64_bytes = base64.b64encode(bytes(content, "utf-8"))
     base64_string = base64_bytes.decode("utf-8")
 
     data = {"contents": base64_string}
-    headers = {
-        "Content-Type": "application/json",
-    }
     response = requests.post(url, data=json.dumps(data), headers=headers)
+    return response.content
 
+
+def modify_check_instance(content: bytes, check_id: int, pdf_file: str) -> None:
+    """Modify check instance, add created pdf file, change status to 'rendered'."""
     check = Check.objects.get(id=check_id)
-    check.pdf_file.save(pdf_file, ContentFile(response.content))
+    check.pdf_file.save(pdf_file, ContentFile(content))
     check.status = "rendered"
     check.save()
-    return pdf_file
+
+
+def write_file(context: Dict, check_id: int, check_type: str) -> None:
+    """Write pdf file, using check order data, attach it to check model."""
+    pdf_file: str = get_pdf_file_name(context.get("id"), check_type)
+    content: bytes = create_pdf_data(context, check_type)
+    modify_check_instance(content, check_id, pdf_file)
