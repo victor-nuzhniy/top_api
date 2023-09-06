@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Check for kitchen</title>
+    </head>
+    <body>
+        <div>
+            <h3>Check for kitchen</h3>
+            <div>Date: {{ date }}</div>
+            <div>Place: {{ point.name }}</div>
+            <div>
+                {% for dish in dishes %}
+                    <div>{{ dish.code }} {{ dish.name }} {{ dish.quantity }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </body>
+</html>
