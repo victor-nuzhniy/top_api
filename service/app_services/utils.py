@@ -1,8 +1,12 @@
 """Utilities for 'service' app."""
+import base64
 import json
 from typing import Dict, Optional
 
+import requests
+from django.core.files.base import ContentFile
 from django.db.models import QuerySet
+from django.template.loader import render_to_string
 from rest_framework import status
 from rest_framework.serializers import ModelSerializer
 
@@ -29,11 +33,10 @@ def check_order_not_exists(data: Dict) -> None:
 
     If it exists, raise ValidationError.
     """
-    order: bytes = data.get("order")
+    order: Dict = data.get("order")
     if Check.objects.filter(order=order).exists():
-        order_data = json.loads(order)
         raise CustomValidationError(
-            detail=f"Order with id {order_data.get('id')} already exists.",
+            detail=f"Order with id {order.get('id')} already exists.",
             field="message",
             status_code=status.HTTP_409_CONFLICT,
         )
@@ -49,8 +52,9 @@ def perform_check_creation(data: Dict, printers: QuerySet) -> None:
     serializer.is_valid(raise_exception=True)
     for printer in printers:
         serializer.save(printer_id=printer)
-        serializer.instance = None
         # TODO here must be inserted celery task call for pdf file creation
+        write_file(data, serializer.instance.pk)
+        serializer.instance = None
 
 
 def check_exists(data: Dict) -> Check:
@@ -93,3 +97,35 @@ def get_check_instance(data: Dict) -> Check:
             status_code=status.HTTP_404_NOT_FOUND,
         )
     return instance
+
+
+def get_pdf_file_name(order_id: int, check_type: str) -> str:
+    """Get check pdf file name."""
+    return f"{order_id}_{check_type}.pdf"
+
+
+def write_file(data: Dict, check_id: int) -> str:
+    """Write pdf file, using check order data, attach it to check model."""
+    context = data.get("order")
+    content = render_to_string("client.html", context)
+
+    pdf_file: str = get_pdf_file_name(context.get("id"), data.get("type"))
+
+    url = "http://127.0.0.1:8001/"
+
+    base64_bytes = base64.b64encode(bytes(content, "utf-8"))
+    base64_string = base64_bytes.decode("utf-8")
+
+    data = {"contents": base64_string}
+    headers = {
+        "Content-Type": "application/json",
+    }
+    response = requests.post(url, data=json.dumps(data), headers=headers)
+
+    # with open(f"media/pdf/{pdf_file}", "wb") as file:
+    #     file.write(response.content)
+    check = Check.objects.get(id=check_id)
+    check.pdf_file.save(pdf_file, ContentFile(response.content))
+    check.status = "rendered"
+    check.save()
+    return pdf_file
