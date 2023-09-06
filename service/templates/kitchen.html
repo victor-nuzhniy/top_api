@@ -7,11 +7,13 @@
     <body>
         <div>
             <h3>Check for kitchen</h3>
+            <h4>Order id {{ id }}</h4>
             <div>Date: {{ date }}</div>
             <div>Place: {{ point.name }}</div>
             <div>
-                {% for dish in dishes %}
-                    <div>{{ dish.code }} {{ dish.name }} {{ dish.quantity }}</div>
+                <h4>Products</h4>
+                {% for product in products %}
+                    <div>{{ product.id }} {{ product.code }} {{ product.name }} {{ product.quantity }}</div>
                 {% endfor %}
             </div>
         </div>

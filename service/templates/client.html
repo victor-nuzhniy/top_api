@@ -10,8 +10,9 @@
             <div>Date: {{ date }}</div>
             <div>Place: {{ point.name }}</div>
             <div>
-                {% for dish in dishes %}
-                    <div>{{ dish.name }} {{ dish.quantity }} {{ dish.summ }}</div>
+                <h4>Products</h4>
+                {% for product in products %}
+                    <div>{{ product.id }} {{ product.name }} {{ product.quantity }} {{ product.sum }}</div>
                 {% endfor %}
             </div>
             <div>Total: {{ total }}</div>
