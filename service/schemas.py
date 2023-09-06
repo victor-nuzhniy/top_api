@@ -16,28 +16,11 @@ class CheckSchema(AutoSchema):
         if method.lower() == "post":
             custom_fields: List = [
                 coreapi.Field(
-                    name="type",
-                    required=True,
-                    location="form",
-                    schema=coreschema.String(
-                        description="Check type. Choice from 'kitchen' and 'client'."
-                    ),
-                ),
-                coreapi.Field(
                     name="order",
                     required=True,
                     location="form",
                     schema=coreschema.Object(description="Order data."),
                     description="Order data.",
-                ),
-                coreapi.Field(
-                    name="status",
-                    required=True,
-                    location="form",
-                    schema=coreschema.String(
-                        description="Check status. Choice from "
-                        "'new', 'rendered', 'printed'."
-                    ),
                 ),
                 coreapi.Field(
                     name="point_id",

@@ -5,11 +5,6 @@ swagger_check_create_schema = openapi.Schema(
     title="Create check",
     type=openapi.TYPE_OBJECT,
     properties={
-        "type": openapi.Schema(
-            type=openapi.TYPE_STRING,
-            description="Check type. Choice from 'kitchen' and 'client'.",
-            example="kitchen",
-        ),
         "order": openapi.Schema(
             type=openapi.TYPE_OBJECT,
             description="Order in json format",
@@ -83,11 +78,6 @@ swagger_check_create_schema = openapi.Schema(
                     example=200,
                 ),
             },
-        ),
-        "status": openapi.Schema(
-            type=openapi.TYPE_STRING,
-            description="Check status. Choice from " "'new', 'rendered', 'printed'.",
-            example="new",
         ),
         "point_id": openapi.Schema(
             type=openapi.TYPE_INTEGER, description="Point id", example=1
