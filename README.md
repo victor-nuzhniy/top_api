@@ -73,3 +73,5 @@ There is need to always check amount of test cases and their covering.
 
        pytest --cov
 
+2. To load previously created fixtures, printer_fixtures.json for example, 
+    we can use command  python manage.py loaddata printer_fixtures.json
