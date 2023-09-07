@@ -146,6 +146,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CELERY_broker_url = str(os.getenv("CELERY_BROKER_REDIS_URL"))
+CELERY_BROKER_URL = str(os.getenv("CELERY_BROKER_REDIS_URL"))
+
+CELERY_RESULT_BACKEND = str(os.getenv("CELERY_RESULT_BACKEND"))
 
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
+
+imports = ("service.tasks",)
