@@ -19,8 +19,8 @@ class CheckSchema(AutoSchema):
                     name="order",
                     required=True,
                     location="form",
-                    schema=coreschema.Object(description="Order data."),
-                    description="Order data.",
+                    schema=coreschema.Object(description="Order data in json format."),
+                    description="Order data in json format.",
                 ),
                 coreapi.Field(
                     name="point_id",
