@@ -5,7 +5,21 @@
 ###Sensitive data
 
 1. Create in the project root (or obtain from team member) an `.env` file with 
-environment variables required by application.
+environment variables required by application. 
+
+POSTGRES_HOST=
+POSTGRES_PORT=
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_DB=
+
+SECRET_KEY =
+
+ALLOWED_HOSTS=
+DEBUG =
+
+CELERY_BROKER_REDIS_URL=
+CELERY_RESULT_BACKEND=
 
 ### Performing commits
 
