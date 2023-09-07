@@ -34,10 +34,6 @@ paths:
           title: Create check
           type: object
           properties:
-            type:
-              description: Check type. Choice from 'kitchen' and 'client'.
-              type: string
-              example: kitchen
             order:
               description: Order in json format
               type: object
@@ -96,10 +92,6 @@ paths:
                   description: Order sum
                   type: integer
                   example: 200
-            status:
-              description: Check status. Choice from 'new', 'rendered', 'printed'.
-              type: string
-              example: new
             point_id:
               description: Point id
               type: integer
@@ -188,7 +180,6 @@ paths:
 definitions:
   Check:
     required:
-    - type
     - order
     type: object
     properties:
