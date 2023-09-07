@@ -38,7 +38,11 @@ class CheckFactory(BaseModelFactory):
 
     printer_id: int = factory.SubFactory(PrinterFactory)
     type: str = factory.Faker("random_element", elements=("kitchen", "client"))
-    order: Dict = factory.Faker("pydict")
+    order: Dict = factory.Faker(
+        "pydict",
+        value_types=["int", "str", "dict", "list"],
+        allowed_types=["int", "str", "dict", "list"],
+    )
     status: str = factory.Faker(
         "random_element", elements=("new", "rendered", "printed")
     )
